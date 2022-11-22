@@ -1,0 +1,53 @@
+version: "3"
+services:
+  app:
+    build:
+      args:
+        user: www-data
+        uid: 1000
+      context: ./
+      dockerfile: php.dockerfile
+    image: php
+    container_name: shopper-php
+    restart: unless-stopped
+    working_dir: /var/www/
+    volumes:
+      - ./src:/var/www
+      - ./src/php/local.ini:/usr/local/etc/php/local.ini
+    networks:
+      - shopper
+
+  db:
+    image: mysql:5.7
+    container_name: shopper-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: shopper-ringier-sa
+      MYSQL_USER: shopper
+      MYSQL_PASSWORD: W(cJ8G-l1!JAU5I1 
+      MYSQL_ROOT_PASSWORD: W(cJ8G-l1!JAU5I1 
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+    volumes:
+      - ./mysql:/docker-entrypoint-initdb.d
+    networks:
+      - shopper
+      
+  nginx:
+    image: nginx:alpine
+    container_name: shopper-nginx
+    restart: unless-stopped
+    ports:
+      - 80:80
+    volumes:
+      - ./src:/var/www
+      - ./nginx:/etc/nginx/conf.d/
+    depends_on:
+      - app
+      - db
+    networks:
+      - shopper
+
+networks:
+  shopper:
+    driver: bridge
