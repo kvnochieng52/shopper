@@ -1,5 +1,11 @@
 FROM php:7.4-fpm
 
+WORKDIR /var/www/
+
+COPY . .
+
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin/ --filename=composer
+
 # Arguments defined in docker-compose.yml
 ARG user
 ARG uid
@@ -50,6 +56,10 @@ RUN mkdir -p /home/$user/.composer && \
 
 # Set working directory
 WORKDIR /var/www
+# COPY *.json .
+# INSTALL YOUR DEPENDENCIES
+ENV COMPOSER_ALLOW_SUPERUSER 1
+RUN composer install
 
 USER $user
 
